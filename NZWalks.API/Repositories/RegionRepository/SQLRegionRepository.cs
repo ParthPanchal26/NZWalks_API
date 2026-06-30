@@ -36,10 +36,10 @@ namespace NZWalks.API.Repositories.RegionRepository
         // Create a new region
         public async Task<Region> CreateRegionAsync(Region region)
         {
-            await _dbContext.Regions.AddAsync(region);
+            var regionEntry = await _dbContext.Regions.AddAsync(region);
             await _dbContext.SaveChangesAsync();
 
-            return region;
+            return regionEntry.Entity;
         }
 
         public async Task<Region> UpdateRegionAsync(Guid id, Region exisingRegion, UpdateRegionRequestDTO model)
