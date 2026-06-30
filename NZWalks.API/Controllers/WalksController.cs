@@ -108,6 +108,9 @@ namespace NZWalks.API.Controllers
 
         // Delete a walk
         [HttpDelete("{id:Guid}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> DeleteWalk([FromRoute] Guid id)
         {
             if(id == Guid.Empty) return BadRequest("Invalid walk id");

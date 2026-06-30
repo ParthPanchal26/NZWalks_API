@@ -15,12 +15,12 @@ namespace NZWalks.API.Repositories.WalkRepository
 
         public async Task<Walk?> GetExistingWalkByName(string walkName)
         {
-            return await _dbContext.Walks.FirstOrDefaultAsync(x => x.Name == walkName);
+            return await _dbContext.Walks.Include("Difficulty").Include("Region").FirstOrDefaultAsync(x => x.Name == walkName);
         }
 
         public async Task<Walk?> GetExistingWalkById(Guid id)
         {
-            return await _dbContext.Walks.FirstOrDefaultAsync(x => x.Id == id);
+            return await _dbContext.Walks.Include("Difficulty").Include("Region").FirstOrDefaultAsync(x => x.Id == id);
         }
         
         public async Task<Walk> CreateWalkAsync(Walk walkModel)
@@ -28,12 +28,12 @@ namespace NZWalks.API.Repositories.WalkRepository
             await _dbContext.Walks.AddAsync(walkModel);
             await _dbContext.SaveChangesAsync();
 
-            return walkModel;
+            return await GetExistingWalkByName(walkModel.Name);
         }
 
         public async Task<IEnumerable<Walk>> GetAllWalksAsync()
         {
-            return await _dbContext.Walks.ToListAsync();
+            return await _dbContext.Walks.Include("Difficulty").Include("Region").ToListAsync();
         }
 
         public async Task<Walk?> UpdateWalksAsync(Guid id, Walk walkModel)
@@ -52,7 +52,7 @@ namespace NZWalks.API.Repositories.WalkRepository
 
             await _dbContext.SaveChangesAsync();
 
-            return walk;
+            return await GetExistingWalkById(id);
         }
 
         public async Task DeleteWalkAsync(Walk walk)
