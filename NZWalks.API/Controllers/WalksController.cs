@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using NZWalks.API.CustomeActionFilters;
 using NZWalks.API.Models.Domain;
 using NZWalks.API.Models.DTO.WalkDTOs;
 using NZWalks.API.Repositories.WalkRepository;
@@ -22,17 +23,16 @@ namespace NZWalks.API.Controllers
             _mapper = mapper;
         }
 
+        #region create
         // Create a walk
         [HttpPost(Name = "CreateWalk")]
+        [ValidateModel]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> CreateWalk([FromBody] CreateWalkRequestDTO model)
         {
-
-            if(!ModelState.IsValid) return BadRequest(ModelState);
-
             var existingWalk = await _walkRepository.GetExistingWalkByName(model.Name);
 
             if (existingWalk != null) return Conflict("Walk already exist");
@@ -43,10 +43,13 @@ namespace NZWalks.API.Controllers
 
             var walkDto = _mapper.Map<WalkDTO>(walk);
 
-            //return Ok(walkDto);
-            return CreatedAtAction("GetWalkById", new { id = walkDto.Id }, walkDto);
-        }
+            var newWalkDto = await _walkRepository.GetExistingWalkById(walkDto.Id);
 
+            return CreatedAtAction("GetWalkById", new { id = newWalkDto.Id }, newWalkDto);
+        }
+        #endregion
+
+        #region get
         // Get all walks
         [HttpGet(Name = "GetAllWalks")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -81,9 +84,12 @@ namespace NZWalks.API.Controllers
 
             return Ok(walkDto);
         }
+        #endregion
 
+        #region put
         // Update a walk
         [HttpPut("{id:Guid}")]
+        [ValidateModel]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -92,8 +98,6 @@ namespace NZWalks.API.Controllers
         {
 
             if (id == Guid.Empty) return BadRequest("Invalid walk id");
-
-            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var walkModel = _mapper.Map<Walk>(model);
 
@@ -105,7 +109,9 @@ namespace NZWalks.API.Controllers
 
             return Ok(walkDto);
         }
+        #endregion
 
+        #region delete
         // Delete a walk
         [HttpDelete("{id:Guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -123,6 +129,7 @@ namespace NZWalks.API.Controllers
 
             return Ok("Walk deleted successfully");
         }
+        #endregion
 
     }
 }

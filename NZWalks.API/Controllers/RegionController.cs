@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NZWalks.API.CustomeActionFilters;
 using NZWalks.API.Data;
 using NZWalks.API.Models.Domain;
 using NZWalks.API.Models.DTO.RegionDTOs;
@@ -14,17 +15,16 @@ namespace NZWalks.API.Controllers
     public class RegionController : ControllerBase
     {
 
-        private readonly NZWalksDbContext _dbContext;
         private readonly IRegionRepository _regionRepository;
         private readonly IMapper _mapper;
 
-        public RegionController(NZWalksDbContext dbContext, IRegionRepository regionRepository, IMapper mapper)
+        public RegionController(IRegionRepository regionRepository, IMapper mapper)
         {
-            _dbContext = dbContext;
             _regionRepository = regionRepository;
             _mapper = mapper;
         }
 
+        #region get
         //Get all regions
         [HttpGet(Name = "GetAllRegions")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -35,14 +35,6 @@ namespace NZWalks.API.Controllers
             var regions = await _regionRepository.GetAllRegionsAsync();
 
             if (regions.Count == 0) return NotFound("Regions not found");
-
-            //var regionDTOs = regions.Select(r => new RegionDTO()
-            //{
-            //    Id = r.Id,
-            //    Name = r.Name,
-            //    Code = r.Code,
-            //    RegionImageUrl = r.RegionImageUrl,
-            //});
 
             var regionDTOs = _mapper.Map<IEnumerable<RegionDTO>>(regions);
 
@@ -57,7 +49,6 @@ namespace NZWalks.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<RegionDTO>> GetRegionById([FromRoute] Guid id)
         {
-            //var region = _dbContext.Regions.Where(r => r.Id == id).FirstOrDefault();
 
             if (id == Guid.Empty) return BadRequest("Invalid region id");
 
@@ -68,21 +59,17 @@ namespace NZWalks.API.Controllers
                 return NotFound("Region could not found");
             }
 
-            //var regionDTO = new RegionDTO()
-            //{
-            //    Id = region.Id,
-            //    Name = region.Name,
-            //    Code = region.Code,
-            //    RegionImageUrl = region.RegionImageUrl,
-            //};
-
             var regionDTO = _mapper.Map<RegionDTO>(region);
 
             return Ok(regionDTO);
         }
+        
+        #endregion
 
+        #region create
         // Crete a region
         [HttpPost(Name = "CreateRegion")]
+        [ValidateModel]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -90,39 +77,25 @@ namespace NZWalks.API.Controllers
         public async Task<ActionResult<RegionDTO>> CreateRegion([FromBody] CreateRegionRequestDTO model)
         {
 
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             var exisingRegion = await _regionRepository.GetExisingRegion(model.Name, model.Code);
 
             if (exisingRegion != null) return Conflict("Region already exist");
-
-            //var regionModel = new Region()
-            //{
-            //    Id = Guid.NewGuid(),
-            //    Name = model.Name,
-            //    Code = model.Code,
-            //    RegionImageUrl = model.RegionImageUrl
-            //};
-
+   
             var regionModel = _mapper.Map<Region>(model);
 
             var region = await _regionRepository.CreateRegionAsync(regionModel);
-
-            //var regionDTO = new RegionDTO()
-            //{
-            //    Id = region.Id,
-            //    Name = region.Name,
-            //    Code = region.Code,
-            //    RegionImageUrl = region.RegionImageUrl
-            //};
 
             var regionDTO = _mapper.Map<RegionDTO>(region);
 
             return CreatedAtAction("GetRegionById", new { Id = regionDTO.Id }, regionDTO);
         }
 
+        #endregion
+
+        #region update
         // Update a region
         [HttpPut("{id:Guid}", Name = "UpdateRegion")]
+        [ValidateModel]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -132,28 +105,20 @@ namespace NZWalks.API.Controllers
 
             if (id == Guid.Empty) return BadRequest("Invalid region Id");
 
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             var exisingRegion = await _regionRepository.GetRegionAsync(id);
 
             if (exisingRegion == null) return NotFound("Region not found");
 
             var dbRegion = await _regionRepository.UpdateRegionAsync(id, exisingRegion, model);
 
-            //var regionDTO = new RegionDTO()
-            //{
-            //    Id = dbRegion.Id,
-            //    Code = dbRegion.Code,
-            //    Name = dbRegion.Name,
-            //    RegionImageUrl = dbRegion.RegionImageUrl
-            //};
-
             var regionDTO = _mapper.Map<RegionDTO>(dbRegion);
 
             return Ok(regionDTO);
         }
+        #endregion
 
-         //Delete a region
+        #region delete
+        //Delete a region
         [HttpDelete("{id:Guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -172,5 +137,6 @@ namespace NZWalks.API.Controllers
 
             return Ok("Region deleted successfully");
         }
+        #endregion
     }
 }

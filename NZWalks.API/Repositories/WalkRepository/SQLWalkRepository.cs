@@ -25,10 +25,10 @@ namespace NZWalks.API.Repositories.WalkRepository
         
         public async Task<Walk> CreateWalkAsync(Walk walkModel)
         {
-            await _dbContext.Walks.AddAsync(walkModel);
+            var walkEntry = await _dbContext.Walks.AddAsync(walkModel);
             await _dbContext.SaveChangesAsync();
 
-            return await GetExistingWalkByName(walkModel.Name);
+            return walkEntry.Entity;
         }
 
         public async Task<IEnumerable<Walk>> GetAllWalksAsync()
