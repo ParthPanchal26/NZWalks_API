@@ -55,9 +55,9 @@ namespace NZWalks.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IEnumerable<WalkDTO>>> GetAllWalks([FromQuery] string? filterOn, [FromQuery] string? filterQuery, [FromQuery] string? sortBy, [FromQuery] bool isAscending)
+        public async Task<ActionResult<IEnumerable<WalkDTO>>> GetAllWalks([FromQuery] string? filterOn, [FromQuery] string? filterQuery, [FromQuery] string? sortBy, [FromQuery] bool isAscending, int pageNumber = 1, int pageSize = 1000)
         {
-            var walksModels = await _walkRepository.GetAllWalksAsync(filterOn, filterQuery, sortBy, isAscending);
+            var walksModels = await _walkRepository.GetAllWalksAsync(filterOn, filterQuery, sortBy, isAscending, pageNumber, pageSize);
 
             if (!walksModels.Any()) return NotFound("Walks not found");
 
