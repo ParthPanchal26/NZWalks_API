@@ -7,7 +7,7 @@ namespace NZWalks.API.Repositories.WalkRepository
         Task<Walk?> GetExistingWalkByName(string walkName);
         Task<Walk?> GetExistingWalkById(Guid id);
         Task<Walk> CreateWalkAsync(Walk walkModel);
-        Task<IEnumerable<Walk>> GetAllWalksAsync();
+        Task<IEnumerable<Walk>> GetAllWalksAsync(string? filterOn = null, string? filterQuery = null);
         Task<Walk?> UpdateWalksAsync(Guid id, Walk walkModel);
         Task DeleteWalkAsync(Walk walk);
     }
