@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +28,10 @@ namespace NZWalks.API.Controllers
         #region get
         //Get all regions
         [HttpGet(Name = "GetAllRegions")]
+        [Authorize(Roles = "Reader")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<RegionDTO>>> GetAllRegions()
@@ -43,8 +47,11 @@ namespace NZWalks.API.Controllers
 
         // Get a region by its ID
         [HttpGet("{id:Guid}", Name = "GetRegionById")]
+        [Authorize(Roles = "Reader")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<RegionDTO>> GetRegionById([FromRoute] Guid id)
@@ -69,9 +76,12 @@ namespace NZWalks.API.Controllers
         #region create
         // Crete a region
         [HttpPost(Name = "CreateRegion")]
+        [Authorize(Roles = "Writer")]
         [ValidateModel]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<RegionDTO>> CreateRegion([FromBody] CreateRegionRequestDTO model)
@@ -95,9 +105,12 @@ namespace NZWalks.API.Controllers
         #region update
         // Update a region
         [HttpPut("{id:Guid}", Name = "UpdateRegion")]
+        [Authorize(Roles = "Writer")]
         [ValidateModel]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<RegionDTO>> UpdateRegion([FromRoute] Guid id, [FromBody] UpdateRegionRequestDTO model)
@@ -119,9 +132,12 @@ namespace NZWalks.API.Controllers
 
         #region delete
         //Delete a region
-        [HttpDelete("{id:Guid}")]
+        [HttpDelete("{id:Guid}", Name = "DeleteRegion")]
+        [Authorize(Roles = "Writer")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> DeleteRegion([FromRoute] Guid id)

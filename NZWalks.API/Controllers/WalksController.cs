@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -26,9 +27,12 @@ namespace NZWalks.API.Controllers
         #region create
         // Create a walk
         [HttpPost(Name = "CreateWalk")]
+        [Authorize(Roles = "Writer")]
         [ValidateModel]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> CreateWalk([FromBody] CreateWalkRequestDTO model)
@@ -52,7 +56,10 @@ namespace NZWalks.API.Controllers
         #region get
         // Get all walks
         [HttpGet(Name = "GetAllWalks")]
+        [Authorize(Roles = "Reader")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<WalkDTO>>> GetAllWalks([FromQuery] string? filterOn, [FromQuery] string? filterQuery, [FromQuery] string? sortBy, [FromQuery] bool isAscending, int pageNumber = 1, int pageSize = 1000)
@@ -68,8 +75,11 @@ namespace NZWalks.API.Controllers
 
         // Get a walk by its id
         [HttpGet("{id:Guid}", Name = "GetWalkById")]
+        [Authorize(Roles = "Reader")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<WalkDTO>> GetWalkById([FromRoute] Guid id)
@@ -89,9 +99,12 @@ namespace NZWalks.API.Controllers
         #region put
         // Update a walk
         [HttpPut("{id:Guid}")]
+        [Authorize(Roles = "Writer")]
         [ValidateModel]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<WalkDTO>> UpdateWalk([FromRoute] Guid id, [FromBody] UpdateWalkRequestDTO model)
@@ -114,7 +127,10 @@ namespace NZWalks.API.Controllers
         #region delete
         // Delete a walk
         [HttpDelete("{id:Guid}")]
+        [Authorize(Roles = "Writer")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> DeleteWalk([FromRoute] Guid id)
